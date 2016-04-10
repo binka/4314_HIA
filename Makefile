@@ -23,8 +23,8 @@ clean:
 	/bin/rm -f $(OBJ_DIR)/*
 
 
-$(EXEC): $(OBJ_DIR)/main.o
-	g++ -o $@ $^ $(LDFLAGS)
+$(EXEC): $(OBJ_DIR)/main.o $(OBJ_DIR)/HybridIndex.o $(OBJ_DIR)/GappedSequence.o $(OBJ_DIR)/FastaFile.o $(OBJ_DIR)/Aligner.o
+	g++ -o $@ $^ $(LDFLAGS) $(SRC_DIR)/HybridIndex.h $(SRC_DIR)/GappedSequence.h $(SRC_DIR)/FastaFile.h $(SRC_DIR)/Aligner.h
 
-$(OBJ_DIR)/%.o: src/%.cpp
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	g++ -c $(CPPFLAGS) $< -o $@
