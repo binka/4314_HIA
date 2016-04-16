@@ -1,7 +1,11 @@
 #include <iostream>
 
+#include "HybridIndex.h"
+
 int main(){
     std::cout << "Hello World!\n";
+    string ref("hello world!HelloHellowrld.");
+    HybridIndex hy_ind(5, ref);
 }
 
 /*

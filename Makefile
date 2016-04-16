@@ -2,9 +2,9 @@ BIN_DIR = bin
 OBJ_DIR = obj
 SRC_DIR = src
 EXEC = $(BIN_DIR)/HIA
-CPPFLAGS = -Wall -std=c++11 -O3 
+CPPFLAGS = -Wall -g -O3 -std=c++11 -rdynamic
 #-fopenmp
-LDFLAGS = 
+LDFLAGS = -std=c++11 -rdynamic
 #-fopenmp
 
 
@@ -24,7 +24,7 @@ clean:
 
 
 $(EXEC): $(OBJ_DIR)/main.o $(OBJ_DIR)/HybridIndex.o $(OBJ_DIR)/GappedSequence.o $(OBJ_DIR)/FastaFile.o $(OBJ_DIR)/Aligner.o
-	g++ -o $@ $^ $(LDFLAGS) $(SRC_DIR)/HybridIndex.h $(SRC_DIR)/GappedSequence.h $(SRC_DIR)/FastaFile.h $(SRC_DIR)/Aligner.h
+	g++ -o $@ $^ $(SRC_DIR)/HybridIndex.h $(SRC_DIR)/GappedSequence.h $(SRC_DIR)/FastaFile.h $(SRC_DIR)/Aligner.h $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	g++ -c $(CPPFLAGS) $< -o $@
+	g++ -c $<  -o $@ $(CPPFLAGS)
