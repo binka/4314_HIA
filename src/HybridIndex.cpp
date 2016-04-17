@@ -19,7 +19,7 @@ HybridIndex :: HybridIndex(unsigned int kmer_length) : kmer_length(kmer_length){
 /*
  * Uses the string reference without copying. Starts the index creation process.
  */
-HybridIndex :: HybridIndex(unsigned int kmer_length, string &sequence) : kmer_length(kmer_length), sequence(sequence){
+HybridIndex :: HybridIndex(unsigned int kmer_length, const string &sequence) : kmer_length(kmer_length), sequence(sequence){
     create_index();
 }
 
@@ -30,26 +30,53 @@ HybridIndex :: ~HybridIndex(){};
  */
 void HybridIndex :: create_index(){
     if(sequence.size() == 0 || kmer_length == 0){
-        throw logic_error("Cannot create index of a zero sequence and/or kmer length.");
+        throw logic_error("Cannot create index of a zero length sequence and/or kmer.");
     }
 
 
+    hash_table.clear();
+    suffix_array.clear();
+
+    //Find size of alphabet (if a character does not appear in the reference sequence, then it will not be counted)
+    set<char> alphabet;
+    for(char c : sequence){
+        alphabet.insert(c);
+    } 
+
+    //Create a map from kmer to counts of the kmer
     map<string,int> counts;
 
-    for(unsigned int i = 0; i < sequence.size()-kmer_length+1; i++){
+    int num_alphabet = alphabet.size();
+    auto alphabet_it = alphabet.begin();
+    char start = *alphabet.begin();
+    
+    string number = string(kmer_length, start);
+    int capacity = pow(num_alphabet, kmer_length);
+    
+    vector<int> counter(num_alphabet);
+
+    cout << num_alphabet << " " << kmer_length << " " << capacity << endl;
+    
+    for(int i = 0; i < capacity; i++){
+        counter[0]++;
+        number[0] = *(alphabet_it++);
+        //Carry
+        int j = 0;
+        while(counter[j] >= num_alphabet){
+            alphabet_it = alphabet.begin();
+            counter[j] = 0;
+            number[j] = start;
+        }
+        //Add entry
+        counts[number] = 0;
+    }
+
+    int max = sequence.size()-kmer_length+1;
+    for(int i = 0; i < max; i++){
         counts[sequence.substr(i, kmer_length)]++;
     }
 
-    cout << "created counts map\n";
-
-    //Modify the map so it now maps chars to current index into suffix array
-    int index = 0;
-    for(auto elm : counts){
-        int temp = elm.second;
-        counts[elm.first] = index;
-        index += temp;
-    }
-    cout << "updated counts map\n";
+    // cout << "created counts map\n";
 
     //Setup suffix array
     suffix_array.resize(sequence.size()-kmer_length+1);
@@ -58,55 +85,79 @@ void HybridIndex :: create_index(){
         suffix_array[i] = i;
     }
 
-    for(auto s : suffix_array){
-        cout << s << " ";
-    }
-
-    cout << endl;
-
-    cout << "suffix array initialized\n";
+    // cout << "suffix array initialized\n";
 
     //Sort suffix array using the reference sequence
     sort(suffix_array.begin(), suffix_array.end(),
         [this](const int a, const int b){
             //compare using the ints as indices into the sequence
-            cout << a << " < " << b <<  " is " << sequence.compare(a, string::npos, sequence, b, string::npos) << endl;
-            // return a > b;
-            return sequence.compare(a, string::npos, sequence, b, string::npos);
+            return sequence.compare(a, string::npos, sequence, b, string::npos) < 0;
         });
 
-    cout << "sorted suffix array\n";
+    // cout << "sorted suffix array\n";
 
-    //Find size of alphabet (if a character does not appear in the reference sequence, then it will not be counted)
-    set<char> alphabet;
-    for(char c : sequence){
-        alphabet.insert(c);
+    //Setup hash table
+    hash_table.reserve(capacity);
+
+    int index = 0;
+    for(auto elm : counts){
+        hash_table[elm.first] = pair<int, int>(index, elm.second);
+        index += elm.second;
     }
 
-    //Setup hashtable
-    int max = alphabet.size();
-    vector<int> counter(kmer_length, 0);
-    auto counts_it = counts.begin();
-    auto alphabet_it = alphabet.begin();
-    char start = *alphabet.begin();
-    string number = string(kmer_length, start);
-    
-    hash_table.reserve(pow(max, kmer_length));
+    // cout << "created hash table with size " << hash_table.size() << endl;
 
-    for(unsigned int i = 0; i < hash_table.size(); i++){
-        counter[0]++;
-        number[0] = *(alphabet_it++);
-        //Carry
-        int j = 0;
-        while(counter[j] >= max){
-            alphabet_it = alphabet.begin();
-            counter[j] = 0;
-            number[j] = start;
-        }
-        //Add entry (might be incorrect)
-        hash_table[number] = counts_it->second;
-        if((counts_it->first).compare(number) == 0){
-            counts_it++;
+    // for(auto elm : hash_table){
+    //     cout << (elm.first) << ": " << "(" << elm.second.first << "," << elm.second.second << ")\n";
+    // }
+}
+
+/*
+ * Lookup kmer in index, returns a list of indices into index.
+ * kmer must be at least kmer_length characters long.
+ * Uses a seed and extend algorithm for longer kmer lengths.
+ */
+vector<int> HybridIndex::query(const string &kmer){
+    unsigned int size = kmer.size();
+    if(size < kmer_length){
+        vector<int> v;
+        return v;
+    }
+
+    //Find sub-suffix array
+    string kmer_substr = kmer.substr(0, kmer_length);
+    pair<int, int> entry = hash_table[kmer_substr];
+
+    //Find specific part of suffix array
+    auto start_it = suffix_array.begin();
+    advance(start_it, entry.first);
+    auto end_it = suffix_array.begin();
+    advance(end_it, entry.first + entry.second);
+
+    // auto p = equal_range(start_it, end_it, -1,
+    //     [&](const int a, const int b){
+    //         //compare using the ints as indices into the sequence
+    //         cout << a << " " << b << endl;
+    //         if(b == -1){
+    //             return sequence.compare(a, size, kmer) < 0;
+
+    //         }else{
+                
+    //             return sequence.compare(b, size, kmer) < 0;
+    //         }
+    //     });
+
+    //Extend (could be done more effeciently with a double binary search)
+    vector<int> v;
+    // cout << "iterators: " << *start_it << " " << *end_it << endl;
+    for(; start_it != end_it; start_it++){
+        if(sequence.compare(*start_it, size, kmer) == 0){
+            v.push_back(*start_it);
+            cout << *start_it << " ";
         }
     }
+
+    cout << endl;
+
+    return v;
 }

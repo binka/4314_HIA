@@ -3,9 +3,13 @@
 #include "HybridIndex.h"
 
 int main(){
-    std::cout << "Hello World!\n";
-    string ref("hello world!HelloHellowrld.");
-    HybridIndex hy_ind(5, ref);
+    string ref("TATAGGCATGAGCCAC");
+    HybridIndex hy_ind(1, ref);
+    hy_ind.query("A");
+    hy_ind.query("C");
+    hy_ind.query("G");
+    hy_ind.query("T");
+    hy_ind.query("GC");
 }
 
 /*

@@ -10,13 +10,15 @@ using namespace std;
 class HybridIndex{
      public:
           HybridIndex(unsigned int kmer_length);
-          HybridIndex(unsigned int kmer_length, string &sequence);
+          HybridIndex(unsigned int kmer_length, const string &sequence);
           ~HybridIndex();
-          void set_reference(string &sequence);
+          void set_reference(const string &sequence);
+          vector<int> query(const string &kmer);
      private:
           unsigned int kmer_length;
           string sequence;
-          unordered_map<string, int> hash_table;
+          //First int is the index, second is the number of sub-sequences
+          unordered_map<string, pair<int,int>> hash_table;
           vector<int> suffix_array;
           void create_index();
 };
