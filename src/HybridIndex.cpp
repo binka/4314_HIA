@@ -47,23 +47,21 @@ void HybridIndex :: create_index(){
     map<string,int> counts;
 
     int num_alphabet = alphabet.size();
-    auto alphabet_it = alphabet.begin();
-    char start = *alphabet.begin();
+    auto alphabet_it = begin(alphabet);
+    char start = *alphabet_it;
     
     string number = string(kmer_length, start);
     int capacity = pow(num_alphabet, kmer_length);
     
     vector<int> counter(num_alphabet);
 
-    cout << num_alphabet << " " << kmer_length << " " << capacity << endl;
-    
     for(int i = 0; i < capacity; i++){
         counter[0]++;
         number[0] = *(alphabet_it++);
         //Carry
         int j = 0;
         while(counter[j] >= num_alphabet){
-            alphabet_it = alphabet.begin();
+            alphabet_it = begin(alphabet);
             counter[j] = 0;
             number[j] = start;
         }
@@ -88,7 +86,7 @@ void HybridIndex :: create_index(){
     // cout << "suffix array initialized\n";
 
     //Sort suffix array using the reference sequence
-    sort(suffix_array.begin(), suffix_array.end(),
+    sort(begin(suffix_array), end(suffix_array),
         [this](const int a, const int b){
             //compare using the ints as indices into the sequence
             return sequence.compare(a, string::npos, sequence, b, string::npos) < 0;
@@ -129,9 +127,9 @@ vector<int> HybridIndex::query(const string &kmer){
     pair<int, int> entry = hash_table[kmer_substr];
 
     //Find specific part of suffix array
-    auto start_it = suffix_array.begin();
+    auto start_it = begin(suffix_array);
     advance(start_it, entry.first);
-    auto end_it = suffix_array.begin();
+    auto end_it = begin(suffix_array);
     advance(end_it, entry.first + entry.second);
 
     // auto p = equal_range(start_it, end_it, -1,
@@ -153,11 +151,11 @@ vector<int> HybridIndex::query(const string &kmer){
     for(; start_it != end_it; start_it++){
         if(sequence.compare(*start_it, size, kmer) == 0){
             v.push_back(*start_it);
-            cout << *start_it << " ";
+            // cout << *start_it << " ";
         }
     }
 
-    cout << endl;
+    // cout << endl;
 
     return v;
 }
