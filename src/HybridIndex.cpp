@@ -14,8 +14,6 @@ using namespace std;
 
 
 
-HybridIndex :: HybridIndex(unsigned int kmer_length) : kmer_length(kmer_length){}
-
 /*
  * Uses the string reference without copying. Starts the index creation process.
  */
@@ -74,8 +72,6 @@ void HybridIndex :: create_index(){
         counts[sequence.substr(i, kmer_length)]++;
     }
 
-    // cout << "created counts map\n";
-
     //Setup suffix array
     suffix_array.resize(sequence.size()-kmer_length+1);
 
@@ -83,16 +79,12 @@ void HybridIndex :: create_index(){
         suffix_array[i] = i;
     }
 
-    // cout << "suffix array initialized\n";
-
     //Sort suffix array using the reference sequence
     sort(begin(suffix_array), end(suffix_array),
         [this](const int a, const int b){
             //compare using the ints as indices into the sequence
             return sequence.compare(a, string::npos, sequence, b, string::npos) < 0;
         });
-
-    // cout << "sorted suffix array\n";
 
     //Setup hash table
     hash_table.reserve(capacity);
@@ -102,12 +94,6 @@ void HybridIndex :: create_index(){
         hash_table[elm.first] = pair<int, int>(index, elm.second);
         index += elm.second;
     }
-
-    // cout << "created hash table with size " << hash_table.size() << endl;
-
-    // for(auto elm : hash_table){
-    //     cout << (elm.first) << ": " << "(" << elm.second.first << "," << elm.second.second << ")\n";
-    // }
 }
 
 /*
@@ -132,30 +118,13 @@ vector<int> HybridIndex::query(const string &kmer){
     auto end_it = begin(suffix_array);
     advance(end_it, entry.first + entry.second);
 
-    // auto p = equal_range(start_it, end_it, -1,
-    //     [&](const int a, const int b){
-    //         //compare using the ints as indices into the sequence
-    //         cout << a << " " << b << endl;
-    //         if(b == -1){
-    //             return sequence.compare(a, size, kmer) < 0;
-
-    //         }else{
-                
-    //             return sequence.compare(b, size, kmer) < 0;
-    //         }
-    //     });
-
     //Extend (could be done more effeciently with a double binary search)
     vector<int> v;
-    // cout << "iterators: " << *start_it << " " << *end_it << endl;
     for(; start_it != end_it; start_it++){
         if(sequence.compare(*start_it, size, kmer) == 0){
             v.push_back(*start_it);
-            // cout << *start_it << " ";
         }
     }
-
-    // cout << endl;
 
     return v;
 }

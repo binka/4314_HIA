@@ -10,7 +10,7 @@
 
 using namespace std;
 
-GappedSequence::GappedSequence(string name, string description, string &sequence, string gap_string):
+GappedSequence::GappedSequence(string name, string description, const string &sequence, string gap_string):
     name(name),
     description(description),
     sequence(sequence),
@@ -22,7 +22,7 @@ void GappedSequence::add_gaps(int index){
 }
 
 void GappedSequence::add_gaps(vector<int> indices){
-    gaps.insert(end(gaps), begin(indices), begin(indices));
+    gaps.insert(end(gaps), begin(indices), end(indices));
     sort(begin(gaps), end(gaps));
 }
 
@@ -32,9 +32,24 @@ void GappedSequence::add_gaps(vector<int> indices){
 string GappedSequence::get_sequence(){
     stringstream ss;
     auto it = begin(gaps);
+
+    while(it != end(gaps) && *it <= 0){
+        ss << gap_string;
+        it++;
+    }
+
     for(unsigned int i = 0; i < sequence.size(); i++){
-        if(it != end(gaps) && *it == static_cast<int>(i)) ss << gap_string;
+        if(it != end(gaps) && *it == static_cast<int>(i)){
+            ss << gap_string;
+            it++;
+        }
         ss << sequence[i];
     }
+
+    while(it != end(gaps)){
+        ss << gap_string;
+        it++;
+    }
+
     return ss.str();
 }

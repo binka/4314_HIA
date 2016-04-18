@@ -1,15 +1,23 @@
 #include <iostream>
+#include <string>
 
 #include "HybridIndex.h"
+#include "GappedSequence.h"
 
 int main(){
-    string ref("TATAGGCATGAGCCAC");
-    HybridIndex hy_ind(1, ref);
+    HybridIndex hy_ind(1, "TATAGGCATGAGCCAC");
     hy_ind.query("A");
     hy_ind.query("C");
     hy_ind.query("G");
     hy_ind.query("T");
     hy_ind.query("GC");
+
+    string seq("Hello World.");
+    GappedSequence gs("seq1", "descript", seq, "+");
+    gs.add_gaps(0);
+    gs.add_gaps(vector<int> {0, 3, 4, 6, 2, 12, 15, 16});
+    cout << gs.get_name() << "; " << gs.get_description() << endl;
+    cout << gs.get_sequence() << endl;
 }
 
 /*
