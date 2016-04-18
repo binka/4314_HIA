@@ -15,7 +15,7 @@ int main(){
     string seq("Hello World.");
     GappedSequence gs("seq1", "descript", seq, "+");
     gs.add_gaps(0);
-    gs.add_gaps(vector<int> {0, 3, 4, 6, 2, 12, 15, 16});
+    gs.add_gaps(vector<int> {0, 3, 2, 4, 6, 2, 12, 15, 16});
     cout << gs.get_name() << "; " << gs.get_description() << endl;
     cout << gs.get_sequence() << endl;
 }

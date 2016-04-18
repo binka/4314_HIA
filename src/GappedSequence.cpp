@@ -39,7 +39,7 @@ string GappedSequence::get_sequence(){
     }
 
     for(unsigned int i = 0; i < sequence.size(); i++){
-        if(it != end(gaps) && *it == static_cast<int>(i)){
+        while(it != end(gaps) && *it == static_cast<int>(i)){
             ss << gap_string;
             it++;
         }
