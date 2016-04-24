@@ -11,7 +11,7 @@ LDFLAGS = -std=c++11 -rdynamic
 
 .PHONY: clean_out
 
-all: clean $(EXEC)
+all: $(EXEC)
 
 install:
 	mkdir -p $(BIN_DIR)

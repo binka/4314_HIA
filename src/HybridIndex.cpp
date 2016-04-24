@@ -17,16 +17,16 @@ using namespace std;
 /*
  * Uses the string reference without copying. Starts the index creation process.
  */
-HybridIndex :: HybridIndex(unsigned int kmer_length, const string &sequence) : kmer_length(kmer_length), sequence(sequence){
+HybridIndex::HybridIndex(unsigned int kmer_length, const string &sequence) : kmer_length(kmer_length), sequence(sequence){
     create_index();
 }
 
-HybridIndex :: ~HybridIndex(){};
+HybridIndex::~HybridIndex(){};
 
 /*
  * Implements the HIA algorithm specified in the paper. 
  */
-void HybridIndex :: create_index(){
+void HybridIndex::create_index(){
     if(sequence.size() == 0 || kmer_length == 0){
         throw logic_error("Cannot create index of a zero length sequence and/or kmer.");
     }

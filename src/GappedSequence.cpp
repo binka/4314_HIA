@@ -10,7 +10,7 @@
 
 using namespace std;
 
-GappedSequence::GappedSequence(string name, string description, const string &sequence, string gap_string):
+GappedSequence::GappedSequence(const string &sequence, string name, string description, string gap_string):
     name(name),
     description(description),
     sequence(sequence),

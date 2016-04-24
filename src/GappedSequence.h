@@ -8,7 +8,7 @@ using namespace std;
 
 class GappedSequence{
     public:
-        GappedSequence(string name, string description, const string &sequence, string gap_string = "_");
+        GappedSequence(const string &sequence, string name = "", string description = "", string gap_string = "_");
         string get_name(){return name;}
         string get_description(){return description;}
         void add_gaps(int index);
@@ -21,5 +21,4 @@ class GappedSequence{
         string gap_string;
         vector<int> gaps;
 };
- 
 #endif

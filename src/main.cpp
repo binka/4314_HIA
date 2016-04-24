@@ -3,6 +3,7 @@
 
 #include "HybridIndex.h"
 #include "GappedSequence.h"
+#include "Aligner.h"
 
 int main(){
     HybridIndex hy_ind(1, "TATAGGCATGAGCCAC");
@@ -13,11 +14,37 @@ int main(){
     hy_ind.query("GC");
 
     string seq("Hello World.");
-    GappedSequence gs("seq1", "descript", seq, "+");
+    GappedSequence gs(seq, "name", "descript", "+");
     gs.add_gaps(0);
     gs.add_gaps(vector<int> {0, 3, 2, 4, 6, 2, 12, 15, 16});
     cout << gs.get_name() << "; " << gs.get_description() << endl;
     cout << gs.get_sequence() << endl;
+
+    Aligner aligner(2, "TATAGGCATGAGCCAC");
+    aligner.find_alignment("GCCATG", 2);
+    /*
+    read sequence file -> FastaFile object
+    read reads file -> FastaFile/FastaQ object
+
+    //Start the timer for hybrid index creation
+    start_timer()
+
+    Aligner.set_reference(sequence)
+
+    print_elapsed_time
+
+    for each read:
+        Aligner.find_alignment(read)
+        score alignment
+            Should scoring using a combination of a scoring matrix and whether or not
+            the right location on the reference sequence was selected
+            (to caluculate TP,FP,TN,FN) 
+        optionally write alignment to file
+
+    //Measure time to run reads through the aligner
+    print_elapsed_time
+    
+    */
 }
 
 /*
@@ -35,9 +62,6 @@ Aligner class:
     destructor()
     void set_reference(str)
     vector<GappedSequence> find_alignment(read_str)
-    operator<<
-    wrapped_print(line_len)
-    to_file(name)
 
 GappedSequence class:
   public:
