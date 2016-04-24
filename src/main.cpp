@@ -1,11 +1,43 @@
 #include <iostream>
 #include <string>
 
+#include <unistd.h>
+#include <stdlib.h>
+
 #include "HybridIndex.h"
 #include "GappedSequence.h"
 #include "Aligner.h"
 
-int main(){
+using namespace std;
+
+int main(int argc, char* argv[]){
+
+    char option;
+    string fastaFileName;
+
+    //argc will equal 1 if no input arguments are passed in
+    if(argc ==1)
+    {
+        cout << "No input arguments \n" ;
+        exit(0);
+    }
+
+    while((option=getopt(argc,argv,"f:"))!=-1)
+    {
+        switch(option)
+        {
+        /*option h show the help infomation*/
+        case 'f':
+            cout << "SKOOOO BUFFS\n";
+            fastaFileName = optarg;
+            cout << fastaFileName + "\n";
+            break;
+        }
+    }
+  
+
+
+
     HybridIndex hy_ind(1, "TATAGGCATGAGCCAC");
     hy_ind.query("A");
     hy_ind.query("C");
