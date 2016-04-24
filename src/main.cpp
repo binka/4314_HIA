@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
     cout << gs.get_name() << "; " << gs.get_description() << endl;
     cout << gs.get_sequence() << endl;
 
-    Aligner aligner(2, "TATAGGCATGAGCCAC");
+    Aligner aligner(1, "TATAGGCATGAGCCAC");
     aligner.find_alignment("GCCATG", 2);
     /*
     read sequence file -> FastaFile object
