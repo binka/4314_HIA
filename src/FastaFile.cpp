@@ -17,7 +17,7 @@ void FastaFile::buildSequences(string file_name){
     string line;
     string name;
     string seq;
-    string desc;
+    bool firstSeq = true;
 
     sequences.clear();
 
@@ -45,13 +45,15 @@ void FastaFile::buildSequences(string file_name){
         else    // we've hit the > character, start parsing seqname
         {
             cout << "No but actually \n";
-            if(sequences.size() !=0)
+            if(!firstSeq)
             {
                 GappedSequence temp(seq,name);
                 sequences.push_back(temp); 
                 cout << "Just appended name: " << name << " \n" << " its sequence is: \n" << seq; 
             }   
             
+            firstSeq = false;
+
             seq = "";
             for(unsigned int i=1;i<line.length();i++)
             {
