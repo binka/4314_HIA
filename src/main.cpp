@@ -7,6 +7,7 @@
 #include "HybridIndex.h"
 #include "GappedSequence.h"
 #include "Aligner.h"
+#include "FastaFile.h"
 
 using namespace std;
 
@@ -22,18 +23,25 @@ int main(int argc, char* argv[]){
         exit(0);
     }
 
+    //use GetOpt library to parse through arguments
     while((option=getopt(argc,argv,"f:"))!=-1)
     {
         switch(option)
         {
-        /*option h show the help infomation*/
+        /*option f specifies the fasta filename*/
         case 'f':
-            cout << "SKOOOO BUFFS\n";
             fastaFileName = optarg;
             cout << fastaFileName + "\n";
             break;
         }
     }
+
+    FastaFile genome(fastaFileName);
+    //cout << "Testing FastaFile, heres the filename: \n";
+    // cout << genome.fileName;
+
+
+
   
 
 
