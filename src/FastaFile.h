@@ -1,18 +1,18 @@
 #ifndef FASTA_FILE_H
 #define FASTA_FILE_H
 
-#include "GappedSequence.h"
 #include <vector>
 #include <string>
 
+#include "GappedSequence.h"
+
 class FastaFile{
-    
     public:
-    	string fileName;
-    	vector<GappedSequence> genome;
-        FastaFile(string file);
+        FastaFile(string file_name);
+        void buildSequences(string file_name);
     private:
-    	vector<GappedSequence> buildGenome(string fileName);
+        string file_name;
+        vector<GappedSequence> sequences;
 };
  
 #endif

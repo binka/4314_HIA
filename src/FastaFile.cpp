@@ -1,82 +1,61 @@
 #include <iostream>
+#include <fstream>
 #include <string>
+#include <vector>
+#include <regex>
 
 #include "FastaFile.h"
 #include "GappedSequence.h"
-#include <vector>
-#include <fstream>
-#include <regex>
 
 using namespace std;
 
-FastaFile::FastaFile(string file)
-{
-	fileName = file;
-	genome = buildGenome(fileName);
+FastaFile::FastaFile(string file_name): file_name(file_name){
+    buildSequences(file_name);
 }
 
-vector<GappedSequence> FastaFile::buildGenome(string fileName)
-{
-	cout << "I'm building some shiz\n";
+void FastaFile::buildSequences(string file_name){
+    string line;
+    string name;
+    string seq;
+    string desc;
 
-	vector<GappedSequence> genome;
+    sequences.clear();
 
-	string line;
-	string name;
-	string seq;
-	string desc;
+    ifstream myfile(file_name); 
+    if(!myfile.is_open()){
+        return;
+    }
 
+    cout << "file is open\n";
+    while(getline (myfile,line)){
+        cout << line << '\n';
+        // regex e (">(\\S+)\\s+(.*)");
+        regex e (">(.*)");
+        smatch sm;
+        //find where a sequence begins
+        if(regex_match(line, sm, e)){
+            if(sequences.size() ==0){
+                name = sm[0];
+                desc = sm[1];
+            }else{
+                GappedSequence temp(seq,name,desc);
+                sequences.push_back(temp);
+                name = sm[0];
+                desc = sm[1];
+                seq = "";
+            }
+        }else{
+            // we're in the middle of a sequence so just append
+            for(unsigned int i =0;i<line.length();i++){
+                if(line[i] !=('\n') && line[i]!='\t'){
+                    seq += line[i];
+                }
+            }
+        }
 
-	ifstream myfile(fileName); 
-	if( myfile.is_open())
-	{
-		cout << "file is open\n";
-		while( getline (myfile,line) )
-    	{
-      		cout << line << '\n';
-      		// regex e (">(\\S+)\\s+(.*)");
-      		regex e (">(.*)");
-      		smatch sm;
-      		//find where a sequence begins
-      		if(regex_search (line,sm,e))
-      		{
-      			cout << "Regex: " << sm[1] << "\n";
-   
-      		
+        myfile.close();
 
-      			if(genome.size() ==0)
-      			{
-      				name = sm[0];
-      				desc = sm[1];
-      			}
-      			else
-      			{   
-      				GappedSequence temp(seq,name,desc);
-    				genome.push_back(temp);
-      				name = sm[0];
-      				desc = sm[1];
-      				seq = "";
-      			}	
-      				
-      		}
-      		// we're in the middle of a sequence so just append
-      		else
-      		{
-      			for(unsigned int i =0;i<line.length();i++)
-      			{
-      				if(line[i] !=('\n') && line[i]!='\t')
-      				{
-      					seq += line[i];
-      				}
-      			}
-      		}
-
-    	}
-    	myfile.close();
-
-    	GappedSequence temp(seq,name);
-    	genome.push_back(temp);
-	}
-
-	return genome;
+        GappedSequence temp(seq,name);
+        sequences.push_back(temp);
+    }
 }
