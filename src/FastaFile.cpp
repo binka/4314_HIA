@@ -27,35 +27,40 @@ void FastaFile::buildSequences(string file_name){
     }
 
     cout << "file is open\n";
+
+
     while(getline (myfile,line)){
-        cout << line << '\n';
-        // regex e (">(\\S+)\\s+(.*)");
-        regex e (">(.*)");
-        smatch sm;
-        //find where a sequence begins
-        if(regex_match(line, sm, e)){
-            if(sequences.size() ==0){
-                name = sm[0];
-                desc = sm[1];
-            }else{
-                GappedSequence temp(seq,name,desc);
-                sequences.push_back(temp);
-                name = sm[0];
-                desc = sm[1];
-                seq = "";
-            }
-        }else{
-            // we're in the middle of a sequence so just append
-            for(unsigned int i =0;i<line.length();i++){
-                if(line[i] !=('\n') && line[i]!='\t'){
+        //cout << line << '\n';
+        
+        if(line[0] != '>')
+        {
+            cout << "I'm in the matrix\n";
+            for(unsigned int i=0;i<line.length();i++)
+            {
+                //construct seq, ignore newlines and tabs
+                if(line[i] != '\n' && line[i] != '\t')
                     seq += line[i];
-                }
             }
         }
-
-        myfile.close();
-
-        GappedSequence temp(seq,name);
-        sequences.push_back(temp);
+        else    // we've hit the > character, start parsing seqname
+        {
+            cout << "No but actually \n";
+            if(sequences.size() !=0)
+            {
+                GappedSequence temp(seq,name);
+                sequences.push_back(temp); 
+                cout << "Just appended name: " << name << " \n" << " its sequence is: \n" << seq; 
+            }   
+            
+            seq = "";
+            for(unsigned int i=1;i<line.length();i++)
+            {
+                if(line[i] != '\n' && line[i] != '\t')
+                    name += line[i];
+            }
+            cout << "Heres the new name: " << name << "\n";
+            
+        }
     }
+    myfile.close();
 }
