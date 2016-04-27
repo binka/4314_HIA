@@ -9,7 +9,8 @@
 class FastaFile{
     public:
         FastaFile(string file_name);
-        void buildSequences(string file_name);
+        bool build_sequences(string file_name);
+        const vector<GappedSequence>& get_sequences();
     private:
         string file_name;
         vector<GappedSequence> sequences;
