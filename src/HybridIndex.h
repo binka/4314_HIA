@@ -14,7 +14,7 @@ class HybridIndex{
           vector<int> query(const string &kmer);
      private:
           unsigned int kmer_length;
-          const string sequence;
+          const string &sequence;
           //First int is the index, second is the number of sub-sequences
           unordered_map<string, pair<int,int>> hash_table;
           vector<int> suffix_array;

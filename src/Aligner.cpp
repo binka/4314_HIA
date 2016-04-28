@@ -11,9 +11,9 @@ using namespace std;
 
 struct match_region{
     long diagonal;
-    unsigned int read_pos;
-    unsigned int seq_pos;
-    unsigned int length;
+    long read_pos;
+    long seq_pos;
+    long length;
 };
 
 struct candidate_mr{
@@ -21,6 +21,8 @@ struct candidate_mr{
     unsigned int matched_bases;
 
 };
+
+typedef pair<GappedSequence, GappedSequence> GS_pair;
 
 Aligner::Aligner(unsigned int kmer_length, const string &reference):
     kmer_length(kmer_length),
@@ -41,7 +43,7 @@ pair<GappedSequence, GappedSequence> Aligner::find_alignment(const string &read,
     for(unsigned int i = 0; i < read.length() - kmer_length + 1; i++){
         cout << read.substr(i, kmer_length) << endl;
         cout << index.query(read.substr(i, kmer_length)).size() << " results\n";
-        for(unsigned int elm : index.query(read.substr(i, kmer_length))){
+        for(long elm : index.query(read.substr(i, kmer_length))){
             matching_regions.push_back({elm-i, i, elm, kmer_length});
         }
     }
@@ -83,9 +85,10 @@ pair<GappedSequence, GappedSequence> Aligner::find_alignment(const string &read,
     }
 
     //Add remaining MR
+    cout << "last: " << cur_diagonal  << endl;
     new_mrs.push_back({cur_diagonal, start_pos, seq_pos, cur_length-1});
 
-    cout << "New matching regions.";
+    cout << "New matching regions.\n";
     for(auto elm : matching_regions){
         cout << elm.diagonal << " " << elm.read_pos << " " << elm.seq_pos << " " << elm.length << endl;
     }
@@ -133,25 +136,33 @@ pair<GappedSequence, GappedSequence> Aligner::find_alignment(const string &read,
 
     //Align each candidate region
     for(auto cr : candidate_regions){
+        int search_limit = kmer_length;
+
         //Align LMUR (Left-Most Unmatched Region)
         match_region mr = cr.mr_list.front();
+        GS_pair gs_pair = global_align(reference, read, pair<int, int>(mr.seq_pos - search_limit - mr.read_pos, mr.seq_pos), pair<int, int>(0, mr.read_pos));
 
-        //Only do mismatch, insertion, and deletion search up to this many characters
-        int search_limit = kmer_length;
-        //Detect Mismatch case
-        // int start_seq = cr.second[0].get<0>()
-        // for(int i = 0; i < search_limit; i++){
-            
-        // }
+        //Align RMUR (Right-Most Unmatched Region)
+        mr = cr.mr_list.back();
+        GS_pair gs_pair2 = global_align(reference, read, pair<int, int>(mr.seq_pos, mr.seq_pos + search_limit + mr.read_pos), pair<int, int>(mr.read_pos, string::npos));
 
-        //Mixed case
-        global_align(reference, read, pair<int, int>(mr.seq_pos - search_limit, mr.seq_pos), pair<int, int>(0, mr.read_pos));
+        //Align all MRUR
+        GS_pair gs_pair_acc = GS_pair(GappedSequence::merge(gs_pair.first, gs_pair2.first), GappedSequence::merge(gs_pair.second, gs_pair2.second));
+        auto it1 = begin(cr.mr_list);
+        auto it2 = begin(cr.mr_list);
+        it2++;
+        for(; it2 != end(cr.mr_list); it1++, it2++){
+            auto seq_range = pair<int, int>(it1->seq_pos + it1->length, it2->seq_pos);
+            auto read_range = pair<int, int>(it1->read_pos + it1->length, it2->read_pos);
+            GS_pair gs_temp = global_align(reference, read, seq_range, read_range);
+            gs_pair_acc = make_pair(GappedSequence::merge(gs_temp.first, gs_pair_acc.first), GappedSequence::merge(gs_temp.second, gs_pair_acc.second));
+        }
     }
 
 
-    return pair<GappedSequence,GappedSequence>(GappedSequence(read), GappedSequence(read));
+    return GS_pair(GappedSequence(read), GappedSequence(read));
 }
 
-pair<GappedSequence,GappedSequence> Aligner::global_align(const string &seq1, const string &seq2, pair<int, int> seq1_range, pair<int, int> seq2_range){
-    return pair<GappedSequence,GappedSequence>(seq1, seq2);
+GS_pair Aligner::global_align(const string &seq1, const string &seq2, pair<int, int> seq1_range, pair<int, int> seq2_range){
+    return GS_pair(GappedSequence(seq1), GappedSequence(seq2));
 }

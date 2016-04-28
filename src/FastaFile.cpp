@@ -33,7 +33,7 @@ bool FastaFile::build_sequences(string file_name){
         //cout << line << '\n';
         
         if(line[0] != '>'){
-            //construct seq, ignore newlines and tabs
+            //construct seq, ignore special characters
             for(unsigned int i = 0; i < line.length(); i++){
                 if(line[i] != '\r' && line[i] != '\t'){
                     seq += line[i];
@@ -48,7 +48,7 @@ bool FastaFile::build_sequences(string file_name){
                 cout << "Just appended name: " << name << "\nIts sequence is: " << seq << "\n"; 
             }
 
-            seq = "";
+            seq = string();
 
             int stop = min(line.find(' '), line.size() - 1);
             name = line.substr(1, stop - 1);
