@@ -83,16 +83,14 @@ string GappedSequence::get_sequence() const{
  */
 GappedSequence GappedSequence::merge(const GappedSequence &a, const GappedSequence &b){
     if(a.name.compare(b.name) != 0){
-
         throw invalid_argument("Cannot merge GappedSequences with different names.");
     }else if(a.description.compare(b.description) != 0){
-        cout << "'" << a.description << "' '" << b.description << "'\n";
         throw invalid_argument("Cannot merge GappedSequences with different descriptions.");
     }else if(a.sequence != b.sequence){
 
         throw invalid_argument("Cannot merge GappedSequences with different sequences.");
     }
-    GappedSequence temp(a.name, a.description, *a.sequence);
+    GappedSequence temp(*a.sequence, a.name, a.description);
     temp.add_gaps(a.gaps);
     temp.add_gaps(b.gaps);
     return temp;

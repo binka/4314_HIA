@@ -155,10 +155,9 @@ pair<GappedSequence, GappedSequence> Aligner::find_alignment(const string &read,
             auto seq_range = pair<int, int>(it1->seq_pos + it1->length, it2->seq_pos);
             auto read_range = pair<int, int>(it1->read_pos + it1->length, it2->read_pos);
             GS_pair gs_temp = global_align(reference, read, seq_range, read_range);
-            gs_pair_acc = make_pair(GappedSequence::merge(gs_temp.first, gs_pair_acc.first), GappedSequence::merge(gs_temp.second, gs_pair_acc.second));
+            gs_pair_acc = GS_pair(GappedSequence::merge(gs_temp.first, gs_pair_acc.first), GappedSequence::merge(gs_temp.second, gs_pair_acc.second));
         }
     }
-
 
     return GS_pair(GappedSequence(read), GappedSequence(read));
 }
@@ -183,27 +182,18 @@ GS_pair Aligner::global_align(const string &seq1, const string &seq2, pair<int, 
     // ########## Building DP Matrix ####################
     // ##################################################
 
-    for (int row = 0; row < numRows; row++)
-    {
-        for (int col = 0; col < numCols; col++)
-        {
-            if (row == 0 and col == 0)
-            {
+    for (int row = 0; row < numRows; row++){
+        for (int col = 0; col < numCols; col++){
+            if (row == 0 && col == 0){
                 matrix[row][col] = 0;
-            }
-            else if (row == 0) {
+            }else if (row == 0) {
                 matrix[row][col] = matrix[row][col - 1] + 1;
-            }
-            else if (col == 0) {
+            }else if (col == 0) {
                 matrix[row][col] = matrix[row - 1][col] + 1;
-            }
-            else {
-                if (seq1[col - 1] == seq2[row - 1])
-                {
+            }else {
+                if (seq1[col - 1] == seq2[row - 1]){
                     substitution = 0; //match score = 0
-                }
-                else
-                {
+                }else{
                     substitution = 1; //mismatch score = 1
                 }
 
@@ -233,7 +223,7 @@ GS_pair Aligner::global_align(const string &seq1, const string &seq2, pair<int, 
     GappedSequence s1(seq1, "", "", "");
     GappedSequence s2(seq2, "", "", "");
 
-    int match = 0;
+    bool match = 0;
 
     int currentCol = seq1Length;
     int currentRow = seq2Length;
@@ -246,63 +236,38 @@ GS_pair Aligner::global_align(const string &seq1, const string &seq2, pair<int, 
     int string1Index = seq1Length;
     int string2Index = seq2Length;
 
-    while(true)
-    {
+    while(true){
 
-        if (currentCol == 0 and currentRow == 0)
-        {
-            break; //breaks when traceback gets to top left cell
-        }
+        if (currentCol == 0 and currentRow == 0) break;
 
-        if (currentRow != 0 and currentCol != 0)
-        {
+        if (currentRow != 0 && currentCol != 0){
             left = matrix[currentRow][currentCol - 1];
             top = matrix[currentRow - 1][currentCol];
             diagonal = matrix[currentRow - 1][currentCol - 1];
         }
 
-        num = min(min(left, top), diagonal);
+        num = min(diagonal, min(left, top));
 
-        if (seq1[currentCol - 1] == seq2[currentRow - 1])
-        {
-            match = 1;
-        }
+        match = seq1[currentCol - 1] == seq2[currentRow - 1];
 
-        if ((num == left and num != diagonal and match != 1) or (currentRow == 0))
-        {
+        if ((num == left && num != diagonal && !match) || (currentRow == 0)){
             // left
-
-            // seq2New += '-'; //add a gap
             s2.add_gaps(string2Index);
-            // seq1New += seq1[currentCol - 1]; //take character
             currentCol -= 1;
             string2Index -= 1;
-        }
-
-        else if ((num == top and num != diagonal and match != 1) or (currentCol == 0))
-        {
+        }else if ((num == top && num != diagonal && !match) || (currentCol == 0)){
             // top
-            
-            // seq1New += '-'; //add a gap
             s1.add_gaps(string1Index);
-            // seq2New += seq2[currentRow - 1]; //take character
             currentRow -= 1;
             string1Index -= 1;
-        }
-        else
-        {
+        }else{
             // diagonal
-
-            // seq1New += seq1[currentCol - 1]; //take character
-            // seq2New += seq2[currentRow - 1]; //take character
-
             currentCol -= 1;
             currentRow -= 1;
 
             string1Index -= 1;
             string2Index -= 1;
         }
-        match = 0;
     }
     return GS_pair(s1, s2);
 }
