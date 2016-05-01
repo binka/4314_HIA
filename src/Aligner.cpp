@@ -177,6 +177,10 @@ GS_pair Aligner::global_align(const string &seq1, const string &seq2, pair<int, 
     vector < vector<int> > matrix;
     matrix.resize(numRows, vector<int>(numCols, 0));
 
+    // ##################################################
+    // ########## Building DP Matrix ####################
+    // ##################################################
+
     for (int row = 0; row < numRows; row++)
     {
         for (int col = 0; col < numCols; col++)
@@ -211,20 +215,18 @@ GS_pair Aligner::global_align(const string &seq1, const string &seq2, pair<int, 
         }
     }
 
-    for (int i = 0; i < numRows; i++)
-    {
-        for (int j = 0; j < numCols; j++)
-        {
-            cout << matrix[i][j] << " ";
-        }
-        cout << endl;
-    }
+    // for (int i = 0; i < numRows; i++)
+    // {
+    //     for (int j = 0; j < numCols; j++)
+    //     {
+    //         cout << matrix[i][j] << " ";
+    //     }
+    //     cout << endl;
+    // }
 
-    // alignSequences
-    // #####################################################################
-    // #####################################################################
-    // #####################################################################
-    // #####################################################################
+    // ##################################################
+    // ########## Aligning Sequences ####################
+    // ##################################################
 
     GappedSequence s1(seq1, "", "", "");
     GappedSequence s2(seq2, "", "", "");
@@ -233,7 +235,6 @@ GS_pair Aligner::global_align(const string &seq1, const string &seq2, pair<int, 
 
     int currentCol = seq1Length;
     int currentRow = seq2Length;
-    // int currentCell = 0;
 
     left = 0; 
     top = 0;
@@ -301,5 +302,5 @@ GS_pair Aligner::global_align(const string &seq1, const string &seq2, pair<int, 
         }
         match = 0;
     }
-    // return GS_pair(GappedSequence(seq1), GappedSequence(seq2));
+    return GS_pair(s1, s2);
 }
