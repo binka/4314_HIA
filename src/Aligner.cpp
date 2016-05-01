@@ -165,6 +165,8 @@ pair<GappedSequence, GappedSequence> Aligner::find_alignment(const string &read,
 
 GS_pair Aligner::global_align(const string &seq1, const string &seq2, pair<int, int> seq1_range, pair<int, int> seq2_range){
 
+    //these need to be changed from length of the whole string to the length of the regions
+    // of seq1_range and seq2_range
     int seq1Length = seq1.length();
     int seq2Length = seq2.length();
 
